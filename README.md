@@ -56,13 +56,14 @@ Enter Role (analyst, finance, admin): analyst
 
 Three built-in roles with different table access:
 
-| Role | Access | Purpose |
-|------|--------|---------|
-| **analyst** | Album, Artist, Track, Genre, MediaType | Data analysis |
-| **finance** | Invoice, InvoiceLine, Customer | Financial reports |
-| **admin** | * (All tables) | Full database access |
+| Role        | Access                                 | Purpose              |
+| ----------- | -------------------------------------- | -------------------- |
+| **analyst** | Album, Artist, Track, Genre, MediaType | Data analysis        |
+| **finance** | Invoice, InvoiceLine, Customer         | Financial reports    |
+| **admin**   | \* (All tables)                        | Full database access |
 
 **Example:**
+
 ```python
 ROLE_TABLE_ACCESS = {
     "analyst": ["Album", "Artist", "Track", "Genre", "MediaType"],
@@ -78,6 +79,7 @@ ROLE_TABLE_ACCESS = {
 - Unauthorized table access is blocked
 
 **Protected Columns:**
+
 ```python
 SENSITIVE_COLUMNS = {"Password", "Fax", "Phone", "Address", "PostalCode"}
 ```
@@ -86,13 +88,14 @@ SENSITIVE_COLUMNS = {"Password", "Fax", "Phone", "Address", "PostalCode"}
 
 The agent automatically fixes common SQL generation errors:
 
-| Error Pattern | Fix |
-|---------------|-----|
-| `Track.Album.AlbumId` | `"Album"."AlbumId"` |
+| Error Pattern          | Fix                       |
+| ---------------------- | ------------------------- |
+| `Track.Album.AlbumId`  | `"Album"."AlbumId"`       |
 | Missing table prefixes | Auto-adds main table name |
-| Malformed joins | Validates join syntax |
+| Malformed joins        | Validates join syntax     |
 
 **Example:**
+
 ```python
 # LLM generates: Track.Album.AlbumId
 # System normalizes to: "Album"."AlbumId"
@@ -101,12 +104,14 @@ The agent automatically fixes common SQL generation errors:
 ### 4. **Comprehensive Audit Logging**
 
 All queries are logged to `security_audit.log` with:
+
 - Timestamp
 - Log level (INFO, ERROR, WARNING)
 - User/Role
 - Query details
 
 **Log Example:**
+
 ```
 2026-04-13 10:23:45,123 | INFO | USER:analyst | Query: What are the top 5 albums?
 2026-04-13 10:24:12,456 | ERROR | USER:finance | Error: Role 'finance' unauthorized for table 'Track'
@@ -170,6 +175,7 @@ Assistant: Results: [(...), (...)]
 ### 1. **UserContextFilter** - Logging
 
 Enriches log records with user context:
+
 ```python
 logger.info("Query executed", extra={"user": "analyst"})
 # Output: "... | USER:analyst | Query executed"
@@ -178,6 +184,7 @@ logger.info("Query executed", extra={"user": "analyst"})
 ### 2. **IndustrialAgent** - Core Engine
 
 Manages:
+
 - Schema loading from SQLite
 - LLM communication via Ollama
 - JSON extraction from LLM responses
@@ -237,7 +244,7 @@ Add to `SENSITIVE_COLUMNS`:
 
 ```python
 SENSITIVE_COLUMNS = {
-    "Password", "Fax", "Phone", "Address", 
+    "Password", "Fax", "Phone", "Address",
     "PostalCode", "Email", "SSN"  # New protected columns
 }
 ```
@@ -277,26 +284,33 @@ Every query is logged with timestamp, user, role, and outcome.
 ## 🐛 Troubleshooting
 
 **Issue**: "Connection refused on Ollama"
+
 - Solution: Ensure Ollama is running: `ollama serve`
 
 **Issue**: "Model 'qwen2.5:7b' not found"
+
 - Solution: Download model: `ollama pull qwen2.5:7b`
 
 **Issue**: "PermissionError: unauthorized for table"
+
 - Solution: Your role doesn't have access. Check `ROLE_TABLE_ACCESS`
 
 **Issue**: "No JSON found" when parsing LLM response
+
 - Solution: The LLM didn't return valid JSON. Check model output and adjust system prompt
 
 **Issue**: Database locked or read-only
+
 - Solution: Ensure `Chinook.db` exists and is readable. Use absolute path if needed.
 
 **Issue**: Column names not found in results
+
 - Solution: Check table schema via: `SELECT * FROM sqlite_master WHERE type='table'`
 
 ## 📊 Example Use Cases
 
 ### Analytics Team (analyst role)
+
 ```
 [analyst] > Which artists have the most tracks?
 [analyst] > Show me the genre distribution in our catalog
@@ -304,6 +318,7 @@ Every query is logged with timestamp, user, role, and outcome.
 ```
 
 ### Finance Team (finance role)
+
 ```
 [finance] > What's our total revenue by customer?
 [finance] > Show pending invoices
@@ -311,6 +326,7 @@ Every query is logged with timestamp, user, role, and outcome.
 ```
 
 ### System Administrators (admin role)
+
 ```
 [admin] > Show me all database activity
 [admin] > Export complete customer list
@@ -367,7 +383,7 @@ The system works with the Chinook music database:
 Artists → Albums → Tracks → PlaylistTracks → Playlists
             ↓
           Genres
-          
+
 Customers → Invoices → InvoiceLines → Tracks
 ```
 
@@ -411,4 +427,4 @@ For issues, questions, or suggestions, please open a GitHub issue.
 **Status**: Production Ready ✨  
 **Last Updated**: April 2026  
 **Version**: 5.0.0  
-**Security Level**: Enterprise-Grade  
+**Security Level**: Enterprise-Grade
